@@ -113,7 +113,7 @@ class AuditLogger
 
         return [
             'status'   => $response->getStatusCode(),
-            'contents' => $response->getBody()->getContents(),
+            'response' => $response->getBody()->getContents(),
         ];
     }
 
