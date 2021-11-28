@@ -1,0 +1,15 @@
+{
+    "name": "auditit/auditit-php",
+    "description": "PHP Package To Interact With AuditIt Service",
+    "autoload": {
+        "psr-4": {
+            "Auditit\\Auditit\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {
+
+    },
+    "extra": {
+    }
+}
