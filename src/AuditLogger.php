@@ -101,7 +101,7 @@ class AuditLogger
             ]
         ]);
 
-        $response = $client->post(config('app.url') . '/api/intake', [
+        $response = $client->post(getenv('AUDITIT_API_HOST','https://auditit.app'). '/api/intake', [
             'json' => [
                 'actor'    => $this->actor,
                 'action'   => $this->action,
