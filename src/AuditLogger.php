@@ -87,21 +87,24 @@ class AuditLogger
      */
     public function save()
     {
-        if (empty(AUDITIT_API_TOKEN) || empty(AUDITIT_API_SECRET)) {
+        $token  = getenv('AUDITIT_API_TOKEN') ?: (defined(AUDITIT_API_TOKEN) ? AUDITIT_API_TOKEN : null);
+        $secret = getenv('AUDITIT_API_SECRET') ?: (defined(AUDITIT_API_SECRET) ? AUDITIT_API_SECRET : null);
+        
+        if (empty($token) || empty($secret)) {
             throw new \Exception('Missing AuditIt Credentials');
         }
 
 
         $client = new Client([
             'headers' => [
-                'ApiToken'     => getenv('AUDITIT_API_TOKEN') ?: AUDITIT_API_TOKEN,
-                'ApiSecret'    => getenv('AUDITIT_API_SECRET') ?: AUDITIT_API_SECRET,
+                'ApiToken'     => $token,
+                'ApiSecret'    => $secret,
                 'Accept'       => 'application/json',
                 'Content-Type' => 'application/json',
             ]
         ]);
 
-        $response = $client->post(getenv('AUDITIT_API_HOST','https://auditit.app'). '/api/intake', [
+        $response = $client->post((getenv('AUDITIT_API_HOST') ?: 'https://auditit.app') . '/api/intake', [
             'json' => [
                 'actor'    => $this->actor,
                 'action'   => $this->action,
