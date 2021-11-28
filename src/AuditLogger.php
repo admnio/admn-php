@@ -2,6 +2,7 @@
 
 namespace Auditit\Auditit;
 
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -90,27 +91,29 @@ class AuditLogger
             throw new \Exception('Missing AuditIt Credentials');
         }
 
-        $response = Http::withHeaders([
-            'ApiToken'     => AUDITIT_API_TOKEN,
-            'ApiSecret'    => AUDITIT_API_SECRET,
-            'Accept'       => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->post(config('app.url') . '/api/intake', [
-            'actor'    => $this->actor,
-            'action'   => $this->action,
-            'entities' => $this->entities,
-            'context'  => $this->context,
-            'tags'     => $this->tags,
-            'nonce'    => empty($this->nonce) ? Str::uuid()->toString() : $this->nonce,
+
+        $client = new Client([
+            'headers' => [
+                'ApiToken'     => getenv('AUDITIT_API_TOKEN') ?: AUDITIT_API_TOKEN,
+                'ApiSecret'    => getenv('AUDITIT_API_SECRET') ?: AUDITIT_API_SECRET,
+                'Accept'       => 'application/json',
+                'Content-Type' => 'application/json',
+            ]
         ]);
 
-        if ($response->ok() === false) {
-            Log::debug('Audit Logger Request', $response->json());
-        }
+        $response = $client->post(config('app.url') . '/api/intake', [
+            'json' => [
+                'actor'    => $this->actor,
+                'action'   => $this->action,
+                'entities' => $this->entities,
+                'context'  => $this->context,
+                'tags'     => $this->tags
+            ]
+        ]);
 
         return [
-            'success'  => $response->ok(),
-            'contents' => $response->body(),
+            'status'   => $response->getStatusCode(),
+            'contents' => $response->getBody()->getContents(),
         ];
     }
 

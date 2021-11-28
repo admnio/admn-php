@@ -8,7 +8,7 @@
     },
     "minimum-stability": "dev",
     "require": {
-
+        "guzzlehttp/guzzle": ">=7.0.1"
     },
     "extra": {
     }
