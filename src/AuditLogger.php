@@ -39,6 +39,16 @@ class AuditLogger
     protected $nonce = null;
 
     /**
+     * @var string[]
+     */
+    static $credentals = ['token' => '', 'secret' => ''];
+
+    /**
+     *
+     */
+    const INTAKE_HOST = 'https://intake.auditit.app';
+
+    /**
      * @return AuditLogger
      */
     public static function new()
@@ -47,15 +57,15 @@ class AuditLogger
     }
 
     /**
-     * @param $key
+     * @param $token
      * @param $secret
      */
-    public static function setCredentials($key, $secret)
+    public static function setCredentials($token, $secret)
     {
-        if(defined("AUDITIT_API_TOKEN") === false && defined("AUDITIT_API_SECRET") === false) {
-            define("AUDITIT_API_TOKEN", $key);
-            define("AUDITIT_API_SECRET", $secret);
-        }
+        AuditLogger::$credentals = [
+            'token'  => $token,
+            'secret' => $secret
+        ];
     }
 
     /**
@@ -89,8 +99,8 @@ class AuditLogger
      */
     public function save()
     {
-        $token  = getenv('AUDITIT_API_TOKEN') ?: (defined(AUDITIT_API_TOKEN) ? AUDITIT_API_TOKEN : null);
-        $secret = getenv('AUDITIT_API_SECRET') ?: (defined(AUDITIT_API_SECRET) ? AUDITIT_API_SECRET : null);
+        $token  = AuditLogger::$credentals['token'];
+        $secret = AuditLogger::$credentals['secret'];
 
         if (empty($token) || empty($secret)) {
             throw new \Exception('Missing AuditIt Credentials');
@@ -106,7 +116,7 @@ class AuditLogger
             ]
         ]);
 
-        $response = $client->post((getenv('AUDITIT_API_HOST') ?: 'https://auditit.app') . '/api/intake', [
+        $response = $client->post((getenv('AUDITIT_INTAKE_URL') ?: AuditLogger::INTAKE_HOST), [
             'json' => [
                 'actor'    => $this->actor,
                 'action'   => $this->action,
