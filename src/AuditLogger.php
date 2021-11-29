@@ -52,8 +52,10 @@ class AuditLogger
      */
     public static function setCredentials($key, $secret)
     {
-        define("AUDITIT_API_TOKEN", $key);
-        define("AUDITIT_API_SECRET", $secret);
+        if(defined("AUDITIT_API_TOKEN") === false && defined("AUDITIT_API_SECRET") === false) {
+            define("AUDITIT_API_TOKEN", $key);
+            define("AUDITIT_API_SECRET", $secret);
+        }
     }
 
     /**
@@ -89,7 +91,7 @@ class AuditLogger
     {
         $token  = getenv('AUDITIT_API_TOKEN') ?: (defined(AUDITIT_API_TOKEN) ? AUDITIT_API_TOKEN : null);
         $secret = getenv('AUDITIT_API_SECRET') ?: (defined(AUDITIT_API_SECRET) ? AUDITIT_API_SECRET : null);
-        
+
         if (empty($token) || empty($secret)) {
             throw new \Exception('Missing AuditIt Credentials');
         }
