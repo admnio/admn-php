@@ -116,15 +116,22 @@ class AuditLogger
             ]
         ]);
 
-        $response = $client->post((getenv('AUDITIT_INTAKE_URL') ?: AuditLogger::INTAKE_HOST), [
-            'json' => [
-                'actor'    => $this->actor,
-                'action'   => $this->action,
-                'entities' => $this->entities,
-                'context'  => $this->context,
-                'tags'     => $this->tags
-            ]
-        ]);
+        try {
+            $response = $client->post((getenv('AUDITIT_INTAKE_URL') ?: AuditLogger::INTAKE_HOST), [
+                'json' => [
+                    'actor'    => $this->actor,
+                    'action'   => $this->action,
+                    'entities' => $this->entities,
+                    'context'  => $this->context,
+                    'tags'     => $this->tags
+                ]
+            ]);
+        }catch(\Exception $e){
+            return [
+                'status'   => 500,
+                'response' => $e->getMessage(),
+            ];
+        }
 
         return [
             'status'   => $response->getStatusCode(),
