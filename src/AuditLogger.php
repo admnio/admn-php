@@ -1,11 +1,8 @@
 <?php
 
-namespace Auditit\Auditit;
+namespace Admn\Admn;
 
 use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 /**
  *
@@ -46,7 +43,7 @@ class AuditLogger
     /**
      *
      */
-    const INTAKE_HOST = 'https://intake.auditit.app';
+    const INTAKE_HOST = 'https://intake.admn.io';
 
     /**
      * @return AuditLogger
@@ -117,7 +114,7 @@ class AuditLogger
         ]);
 
         try {
-            $response = $client->post((getenv('AUDITIT_INTAKE_URL') ?: AuditLogger::INTAKE_HOST), [
+            $response = $client->post((getenv('ADMN_INTAKE_HOST') ?: AuditLogger::INTAKE_HOST), [
                 'json' => [
                     'actor'    => $this->actor,
                     'action'   => $this->action,

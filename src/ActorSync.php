@@ -1,6 +1,6 @@
 <?php
 
-namespace Auditit\Auditit;
+namespace Admn\Admn;
 
 use GuzzleHttp\Client;
 
@@ -56,12 +56,14 @@ class ActorSync
                 'ApiSecret'    => $secret,
                 'Accept'       => 'application/json',
                 'Content-Type' => 'application/json',
-            ]
+            ],
+            'connect_timeout' => 2,
+            'timeout' => 2,
         ]);
 
         $path = $type === 'single' ? '/api/actor-sync' : '/api/actor-batch-sync';
 
-        $response = $client->post(AuditLogger::INTAKE_HOST . $path, [
+        $response = $client->post((getenv('ADMN_INTAKE_HOST') ?: AuditLogger::INTAKE_HOST) . $path, [
             'json' => $data
         ]);
 

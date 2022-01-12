@@ -1,9 +1,9 @@
 {
-    "name": "auditit/auditit-php",
-    "description": "PHP Package To Interact With AuditIt Service",
+    "name": "admn/admn-php",
+    "description": "PHP Package To Interact With ADMN Service",
     "autoload": {
         "psr-4": {
-            "Auditit\\Auditit\\": "src/"
+            "Admn\\Admn\\": "src/"
         }
     },
     "minimum-stability": "dev",
