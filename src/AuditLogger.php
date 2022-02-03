@@ -115,7 +115,9 @@ class AuditLogger
                 'ApiSecret' => $secret,
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
-            ]
+            ],
+            'connect_timeout' => 2,
+            'timeout' => 2,
         ]);
 
         try {
