@@ -43,7 +43,12 @@ class AuditLogger
     /**
      *
      */
-    const INTAKE_HOST = 'https://intake.admn.io';
+    const INTAKE_HOST = 'https://hub.admn.io';
+
+    /**
+     *
+     */
+    const INTAKE_PATH = '/nexus/v1/intake';
 
     /**
      * @return AuditLogger
@@ -60,7 +65,7 @@ class AuditLogger
     public static function setCredentials($token, $secret)
     {
         AuditLogger::$credentals = [
-            'token'  => $token,
+            'token' => $token,
             'secret' => $secret
         ];
     }
@@ -96,42 +101,42 @@ class AuditLogger
      */
     public function save()
     {
-        $token  = AuditLogger::$credentals['token'];
+        $token = AuditLogger::$credentals['token'];
         $secret = AuditLogger::$credentals['secret'];
 
         if (empty($token) || empty($secret)) {
-            throw new \Exception('Missing AuditIt Credentials');
+            throw new \Exception('Missing ADMN Credentials');
         }
 
 
         $client = new Client([
             'headers' => [
-                'ApiToken'     => $token,
-                'ApiSecret'    => $secret,
-                'Accept'       => 'application/json',
+                'ApiToken' => $token,
+                'ApiSecret' => $secret,
+                'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
             ]
         ]);
 
         try {
-            $response = $client->post((getenv('ADMN_INTAKE_HOST') ?: AuditLogger::INTAKE_HOST), [
+            $response = $client->post((getenv('ADMN_INTAKE_HOST') ?: AuditLogger::INTAKE_HOST) . AuditLogger::INTAKE_PATH, [
                 'json' => [
-                    'actor'    => $this->actor,
-                    'action'   => $this->action,
+                    'actor' => $this->actor,
+                    'action' => $this->action,
                     'entities' => $this->entities,
-                    'context'  => $this->context,
-                    'tags'     => $this->tags
+                    'context' => $this->context,
+                    'tags' => $this->tags
                 ]
             ]);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return [
-                'status'   => 500,
+                'status' => 500,
                 'response' => $e->getMessage(),
             ];
         }
 
         return [
-            'status'   => $response->getStatusCode(),
+            'status' => $response->getStatusCode(),
             'response' => $response->getBody()->getContents(),
         ];
     }
