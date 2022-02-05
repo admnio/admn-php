@@ -1,6 +1,6 @@
 Installation:
 
-`composer require Admn/Admn-php`
+`composer require admn/admn-php`
 
 Usage:
 
