@@ -14,10 +14,10 @@ AuditLogger::setCredentials($token, $secret);
 AuditLogger::create($actor, $action, $tags, $context);
 
 // For a simple action logging
-AuditLogger::create('id:'.$user->id, $action);
+AuditLogger::create('email:'.$user->email, $action);
 
 // If you wish to add tags
-AuditLogger::create('email:john@doe.com', $action, ['type:account_update','ip:123.123.123.123']]);
+AuditLogger::create('email:john@doe.com', $action, ['account_update','ip:123.123.123.123']]);
 
 // If you wish to add context
 AuditLogger::create('phone:123-123-1234', $action, [], $contextData]);
@@ -27,7 +27,7 @@ AuditLogger::create('phone:123-123-1234', $action, ['type:account_update'], $con
 
 // Or for a more structured call
 AuditLogger::new()
-    ->actor('id:123')
+    ->actor('stripe_id:123567')
     ->action('Updated contact details')
     ->tags(['ip:123.123.123.123'])
     ->context([
@@ -53,7 +53,7 @@ ActorSync::single([
     'display' => 'John Doe',
     'identifiers' =>[
         [
-            'key' => 'id',
+            'key' => 'monster_id',
             'value' => 123
         ],
         [
@@ -68,7 +68,7 @@ ActorSync::bulk([
         'display'     => 'John Doe',
         'identifiers' => [
             [
-                'key'   => 'id',
+                'key'   => 'monster_id',
                 'value' => 123,
             ],
             [
@@ -81,8 +81,12 @@ ActorSync::bulk([
         'display'     => 'Jane Doe',
         'identifiers' => [
             [
-                'key'   => 'id',
+                'key'   => 'monster_id',
                 'value' => 456,
+            ],
+            [
+                'key'   => 'email',
+                'value' => 'jane@doe.com',
             ],
             [
                 'key'   => 'phone',
