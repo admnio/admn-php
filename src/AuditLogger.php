@@ -25,10 +25,6 @@ class AuditLogger
      * @var array
      */
     protected $tags = [];
-    /**
-     * @var array
-     */
-    protected $entities = [];
 
     /**
      * @var null
@@ -48,12 +44,12 @@ class AuditLogger
     /**
      *
      */
-    const INTAKE_PATH = '/nexus/v1/intake';
+    const INTAKE_PATH = '/nexus/v1/actions';
 
     /**
      * @return AuditLogger
      */
-    public static function new()
+    public static function make()
     {
         return (new self());
     }
@@ -65,7 +61,7 @@ class AuditLogger
     public static function setCredentials($token, $secret)
     {
         AuditLogger::$credentals = [
-            'token' => $token,
+            'token'  => $token,
             'secret' => $secret
         ];
     }
@@ -79,7 +75,7 @@ class AuditLogger
      */
     public static function create($actor, $action, $tags = [], $context = [])
     {
-        $builder = AuditLogger::new()
+        $builder = AuditLogger::make()
             ->action($action)
             ->actor($actor);
 
@@ -110,35 +106,34 @@ class AuditLogger
 
 
         $client = new Client([
-            'headers' => [
-                'ApiToken' => $token,
-                'ApiSecret' => $secret,
-                'Accept' => 'application/json',
+            'headers'         => [
+                'NexusToken'     => $token,
+                'NexusSecret'    => $secret,
+                'Accept'       => 'application/json',
                 'Content-Type' => 'application/json',
             ],
             'connect_timeout' => 2,
-            'timeout' => 2,
+            'timeout'         => 2,
         ]);
 
         try {
             $response = $client->post((getenv('ADMN_INTAKE_HOST') ?: AuditLogger::INTAKE_HOST) . AuditLogger::INTAKE_PATH, [
                 'json' => [
-                    'actor' => $this->actor,
-                    'action' => $this->action,
-                    'entities' => $this->entities,
-                    'context' => $this->context,
-                    'tags' => $this->tags
+                    'actor'    => $this->actor,
+                    'action'   => $this->action,
+                    'context'  => $this->context,
+                    'tags'     => $this->tags
                 ]
             ]);
         } catch (\Exception $e) {
             return [
-                'status' => 500,
+                'status'   => 422,
                 'response' => $e->getMessage(),
             ];
         }
 
         return [
-            'status' => $response->getStatusCode(),
+            'status'   => $response->getStatusCode(),
             'response' => $response->getBody()->getContents(),
         ];
     }
@@ -185,19 +180,6 @@ class AuditLogger
     public function addTag($tag)
     {
         $this->tags[] = $tag;
-
-        return $this;
-    }
-
-    /**
-     * @param $entitySourceIdentifier
-     * @param $displayAs
-     * @param null $type
-     * @return $this
-     */
-    public function addEntity($entity)
-    {
-        $this->entities[] = $entity;
 
         return $this;
     }
