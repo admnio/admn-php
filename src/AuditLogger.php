@@ -66,6 +66,12 @@ class AuditLogger
         ];
     }
 
+    public function areCredentialsSet()
+    {
+        return empty(AuditLogger::$credentals['token']) === false
+            && empty(AuditLogger::$credentals['secret']) === false;
+    }
+
     /**
      * @param string|array $actor
      * @param $action
@@ -97,18 +103,18 @@ class AuditLogger
      */
     public function save()
     {
-        $token = AuditLogger::$credentals['token'];
-        $secret = AuditLogger::$credentals['secret'];
-
-        if (empty($token) || empty($secret)) {
-            throw new \Exception('Missing ADMN Credentials');
+        if ($this->areCredentialsSet() === false) {
+            return [
+                'status'   => 422,
+                'response' => 'Credentials are not set.',
+            ];
         }
 
 
         $client = new Client([
             'headers'         => [
-                'NexusToken'     => $token,
-                'NexusSecret'    => $secret,
+                'NexusToken'   => AuditLogger::$credentals['token'],
+                'NexusSecret'  => AuditLogger::$credentals['secret'],
                 'Accept'       => 'application/json',
                 'Content-Type' => 'application/json',
             ],
@@ -119,10 +125,10 @@ class AuditLogger
         try {
             $response = $client->post((getenv('ADMN_INTAKE_HOST') ?: AuditLogger::INTAKE_HOST) . AuditLogger::INTAKE_PATH, [
                 'json' => [
-                    'actor'    => $this->actor,
-                    'action'   => $this->action,
-                    'context'  => $this->context,
-                    'tags'     => $this->tags
+                    'actor'   => $this->actor,
+                    'action'  => $this->action,
+                    'context' => $this->context,
+                    'tags'    => $this->tags
                 ]
             ]);
         } catch (\Exception $e) {
