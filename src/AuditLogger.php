@@ -10,9 +10,9 @@ use GuzzleHttp\Client;
 class AuditLogger
 {
     /**
-     * @var array
+     * @var Actor|null
      */
-    protected $actor = [];
+    protected $actor = null;
     /**
      * @var
      */
@@ -25,33 +25,43 @@ class AuditLogger
      * @var array
      */
     protected $tags = [];
-
     /**
      * @var null
      */
     protected $nonce = null;
 
     /**
+     * @var int
+     */
+    protected $timeout = 2;
+
+    /**
      * @var string[]
      */
     static $credentals = ['token' => '', 'secret' => ''];
-
     /**
      *
      */
-    const INTAKE_HOST = 'https://hub.admn.io';
-
+    const INTAKE_HOST = 'https://api.admn.io';
     /**
      *
      */
-    const INTAKE_PATH = '/nexus/v1/actions';
+    const INTAKE_PATH = '/v1/actions';
+
+    /**
+     * @param Actor $actor
+     */
+    public function __construct(Actor $actor)
+    {
+        $this->actor = $actor;
+    }
 
     /**
      * @return AuditLogger
      */
-    public static function make()
+    public static function make(Actor $actor)
     {
-        return (new self());
+        return (new self($actor));
     }
 
     /**
@@ -61,11 +71,14 @@ class AuditLogger
     public static function setCredentials($token, $secret)
     {
         AuditLogger::$credentals = [
-            'token'  => $token,
+            'token' => $token,
             'secret' => $secret
         ];
     }
 
+    /**
+     * @return bool
+     */
     public function areCredentialsSet()
     {
         return empty(AuditLogger::$credentals['token']) === false
@@ -73,29 +86,47 @@ class AuditLogger
     }
 
     /**
-     * @param string|array $actor
      * @param $action
-     * @param array $tags
-     * @param array $context
-     * @return array|void
+     * @return $this
      */
-    public static function create($actor, $action, $tags = [], $context = [])
+    public function setAction($action)
     {
-        $builder = AuditLogger::make()
-            ->action($action)
-            ->actor($actor);
+        $this->action = $action;
 
+        return $this;
+    }
 
-        foreach ($tags as $tag) {
-            $builder->addTag($tag);
-        }
+    /**
+     * @param $context
+     * @return $this
+     */
+    public function setContext($context)
+    {
+        $this->context = $context;
 
+        return $this;
+    }
 
-        if (empty($context) === false) {
-            $builder->context($context);
-        }
+    /**
+     * @param $tags
+     * @return $this
+     */
+    public function setTags($tags)
+    {
+        $this->tags = $tags;
 
-        return $builder->save();
+        return $this;
+    }
+
+    /**
+     * @param $nonce
+     * @return $this
+     */
+    public function setNonce($nonce)
+    {
+        $this->nonce = $nonce;
+
+        return $this;
     }
 
     /**
@@ -105,96 +136,50 @@ class AuditLogger
     {
         if ($this->areCredentialsSet() === false) {
             return [
-                'status'   => 422,
+                'status' => 422,
                 'response' => 'Credentials are not set.',
             ];
         }
 
 
         $client = new Client([
-            'headers'         => [
-                'NexusToken'   => AuditLogger::$credentals['token'],
-                'NexusSecret'  => AuditLogger::$credentals['secret'],
-                'Accept'       => 'application/json',
+            'headers' => [
+                'X-Token' => AuditLogger::$credentals['token'],
+                'X-Secret' => AuditLogger::$credentals['secret'],
+                'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
             ],
-            'connect_timeout' => 2,
-            'timeout'         => 2,
+            'connect_timeout' => $this->timeout,
+            'timeout' => $this->timeout,
         ]);
 
         try {
             $response = $client->post((getenv('ADMN_INTAKE_HOST') ?: AuditLogger::INTAKE_HOST) . AuditLogger::INTAKE_PATH, [
                 'json' => [
-                    'actor'   => $this->actor,
-                    'action'  => $this->action,
+                    'actor' => [
+                        'identifiers' => $this->actor->getIdentifiers(),
+                        'details' => $this->actor->getDetails(),
+                    ],
+                    'action' => $this->action,
                     'context' => $this->context,
-                    'tags'    => $this->tags
+                    'tags' => $this->tags
                 ]
             ]);
         } catch (\Exception $e) {
             return [
-                'status'   => 422,
+                'status' => 422,
                 'response' => $e->getMessage(),
             ];
         }
 
         return [
-            'status'   => $response->getStatusCode(),
+            'status' => $response->getStatusCode(),
             'response' => $response->getBody()->getContents(),
         ];
     }
 
-    /**
-     * @param $actorSourceIdentifier
-     * @param null $displayAs
-     * @param string $type
-     * @return $this
-     */
-    public function actor($actor)
+    public function setTimeout(int $timeout)
     {
-        $this->actor = $actor;
-
-        return $this;
-    }
-
-    /**
-     * @param $action
-     * @return $this
-     */
-    public function action($action)
-    {
-        $this->action = $action;
-
-        return $this;
-    }
-
-    /**
-     * @param array $context
-     * @return $this
-     */
-    public function context(array $context)
-    {
-        $this->context = $context;
-
-        return $this;
-    }
-
-    /**
-     * @param $tag
-     * @return $this
-     */
-    public function addTag($tag)
-    {
-        $this->tags[] = $tag;
-
-        return $this;
-    }
-
-    /**
-     * @param string $nonce
-     */
-    public function nonce(string $nonce)
-    {
-        $this->nonce = $nonce;
+        $this->timeout = $timeout;
     }
 }
