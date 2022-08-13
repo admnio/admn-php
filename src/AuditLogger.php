@@ -159,6 +159,7 @@ class AuditLogger
                     'actor' => [
                         'identifiers' => $this->actor->getIdentifiers(),
                         'details' => $this->actor->getDetails(),
+                        'display' => $this->actor->getDisplay(),
                     ],
                     'action' => $this->action,
                     'context' => $this->context,

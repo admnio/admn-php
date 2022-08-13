@@ -17,10 +17,15 @@ class Actor
     protected array $details = [];
 
     /**
+     * @var string
+     */
+    protected string $display = '';
+
+    /**
      * @param array $identifiers
      * @param array $details
      */
-    public function __construct(array $identifiers = [], array $details = [])
+    public function __construct(array $identifiers = [], array $details = [], string $display = '')
     {
         foreach ($identifiers as $identifier => $value) {
             $this->setIdentifier($identifier, $value);
@@ -28,6 +33,10 @@ class Actor
 
         foreach ($details as $detail => $value) {
             $this->setDetail($detail, $value);
+        }
+
+        if (empty($display) === false) {
+            $this->setDisplay($display);
         }
     }
 
@@ -69,5 +78,24 @@ class Actor
     public function getDetails()
     {
         return $this->details;
+    }
+
+    /**
+     * @param string $display
+     * @return $this
+     */
+    public function setDisplay(string $display)
+    {
+        $this->display = $display;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDisplay()
+    {
+        return $this->display;
     }
 }
