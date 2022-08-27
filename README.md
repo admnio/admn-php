@@ -1,98 +1,45 @@
+# ADMN.io PHP SDK
+
+A simple wrapper for [ADMN.io](https://admn.io) API written in PHP.
+
+## Features
+
+- Log action as entity (User, Customer, Employee, etc.)
+
+## Requirements
+
+- PHP 7+
+
+## Installation
+
+Via Composer.
+
 Installation:
 
-`composer require admn/admn-php`
-
-Usage:
-
+```bash 
+composer require admn/admn-php
 ```
-use Admn\Admn\AuditLogger;
 
-// Set API Token
+## Usage:
+
+```php
+use Admn\Admn\AuditLogger;
+use Admn\Admn\Actor;
+
+// Set API Token Globally
 AuditLogger::setCredentials($token, $secret);
 
-// Full method definition
-AuditLogger::create($actor, $action, $tags, $context);
+// Create Actor Identifier Object
+$actor = (new Actor())->setIdentifier(email, 'john@doe.com')->setDisplay('John Doe';
 
-// For a simple action logging
-AuditLogger::create('email:'.$user->email, $action);
-
-// If you wish to add tags
-AuditLogger::create('email:john@doe.com', $action, ['account_update','ip:123.123.123.123']]);
-
-// If you wish to add context
-AuditLogger::create('phone:123-123-1234', $action, [], $contextData]);
-
-// If you wish to add tags and context
-AuditLogger::create('phone:123-123-1234', $action, ['type:account_update'], $contextData]);
-
-// Or for a more structured call
-AuditLogger::new()
-    ->actor('stripe_id:123567')
-    ->action('Updated contact details')
-    ->tags(['ip:123.123.123.123'])
-    ->context([
-        'updated_contact_details' => [
-            'first_name' => 'Bob',
-            'email' => 'bob@builder.com'
-        ]
-    ])
-    ->save();
-```
-
-Update/Add Actors
-
-```
-use Admn\Admn\ActorSync;
-use Admn\Admn\AuditLogger;
-
-// Set API Token
-AuditLogger::setCredentials($token, $secret);
-
-// Update or Create an actor in the system
-ActorSync::single([
-    'display' => 'John Doe',
-    'identifiers' =>[
-        [
-            'key' => 'monster_id',
-            'value' => 123
-        ],
-        [
-            'key' => 'email',
-            'value' => 'john@doe.com'
-        ]
-    ]
-]);
-
-ActorSync::bulk([
-    [
-        'display'     => 'John Doe',
-        'identifiers' => [
-            [
-                'key'   => 'monster_id',
-                'value' => 123,
-            ],
-            [
-                'key'   => 'email',
-                'value' => 'john@doe.com',
-            ],
-        ],
-    ],
-    [
-        'display'     => 'Jane Doe',
-        'identifiers' => [
-            [
-                'key'   => 'monster_id',
-                'value' => 456,
-            ],
-            [
-                'key'   => 'email',
-                'value' => 'jane@doe.com',
-            ],
-            [
-                'key'   => 'phone',
-                'value' => '123-456-7890',
-            ],
-        ],
-    ],
-]);
+// Send Action
+ return AuditLogger::make($actor)
+        )->setAction('Updated a user record')
+            ->setTags(['user:123','user-update'])
+            ->setContext([
+               'key' => 'email',
+               'original_value' => 'jane@google.com',
+               'updated_value' => 'jane@doe.com',
+            ])
+            ->save();
 ```
