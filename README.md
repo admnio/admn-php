@@ -31,7 +31,7 @@ use Admn\Admn\Actor;
 AuditLogger::setCredentials($token, $secret);
 
 // Create Actor Identifier Object
-$actor = (new Actor())->setIdentifier(email, 'john@doe.com')->setDisplay('John Doe';
+$actor = (new Actor())->setIdentifier(email, 'john@doe.com')->setDisplay('John Doe');
 
 // Send Action
  return AuditLogger::make($actor)
